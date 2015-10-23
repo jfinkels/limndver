@@ -1,0 +1,340 @@
+%% limndver.tex - limited nondeterminism and verification
+%%
+%% Copyright 2015 Jeffrey Finkelstein.
+%%
+%% This LaTeX markup document is made available under the terms of the Creative
+%% Commons Attribution-ShareAlike 4.0 International License,
+%% https://creativecommons.org/licenses/by-sa/4.0/.
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+%% This must come before hyperref.
+\usepackage{amsthm}
+%% This is strongly recommended by biblatex.
+\usepackage[english]{babel}
+\usepackage[backend=biber]{biblatex}
+\usepackage[T1]{fontenc}
+%% This must come before csquotes.
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+%% This is strongly recommended by biblatex.
+\usepackage{csquotes}
+%% This must come before hyperref.
+\usepackage{thmtools}
+%% This must come before complexity.
+\usepackage{hyperref}
+\usepackage{complexity}
+\usepackage[firstpage]{draftwatermark}
+\usepackage{microtype}
+\usepackage{textcomp}
+%%\usepackage{tikz}
+
+%% Set the amount by which certain characters protrude into the margins.
+%%
+%% \LoadMicrotypeFile{cmr}
+%%
+%%     This command forces the built-in protrusion settings for the Computer
+%%     Modern Roman (cmr) font family to become available at this point, so
+%%     that we can override these settings on the next line. Even though we are
+%%     really using the Latin Modern Roman (lmr) fonts, microtype uses the cmr
+%%     configuration file.
+%%
+%% \SetProtrusion
+%%
+%%     This instructs the microtype package that we are going to modify the
+%%     protrusion settings.
+%%
+%% [load=lmr-T1]
+%%
+%%     Loads the Type 1 (T1) encoding of the lmr font family, thereby setting
+%%     the default protrusion values for all the characters. This is only
+%%     possible after the \LoadMicrotypeFile{cmr} command (microtype
+%%     essentially considers lmr to be an alias for cmr).
+%%
+%% {encoding=T1, family=lmr}
+%%
+%%     Indicates that we are going to modify the protrusion values for the T1
+%%     encoding of the lmr font family.
+%%
+%% \textquotedblright = {,1000} (and similar commands)
+%%
+%%     Force the character given by \textquotedblright to have default
+%%     protrusion on the left margin (given by an empty string before the
+%%     comma) and full protrusion (that is, protrusion value 1000) on the right
+%%     margin.
+\LoadMicrotypeFile{cmr}
+\SetProtrusion
+    [load=lmr-T1]
+    {encoding=T1, family=lmr}
+    {
+      \textquotedblright = {,1000},
+      \textquotedblleft = {1000,},
+      {'} = {,1000},
+      {,} = {,1000},
+      {:} = {,1000},
+      {;} = {,1000},
+      {.} = {,1000}
+    }
+
+%% Set the ``work-in-progress'' watermark for the first page.
+\SetWatermarkLightness{0.9}
+\SetWatermarkText{Work-in-progress}
+\SetWatermarkFontSize{3.5cm}
+
+%% Set the title and author of the PDF file.
+\hypersetup{pdftitle={Limited nondeterminism and verification}, pdfauthor={Jeffrey Finkelstein}}
+
+%% Declare the bibliography file.
+\addbibresource{limndver.bib}
+
+%% Declare theorem-like environments.
+\declaretheorem[numberwithin=section]{theorem}
+\declaretheorem[numberlike=theorem]{lemma}
+\declaretheorem[numberlike=theorem]{corollary}
+\declaretheorem[numberlike=theorem]{proposition}
+
+%% Custom commands are declared here.
+\newcommand{\email}[1]{\textlangle\href{mailto:#1}{\nolinkurl{#1}}\textrangle}
+\newcommand{\todo}[1]{\textbf{TODO #1}}
+\mathchardef\mhyphen="2D 
+\DeclareMathOperator{\cl}{cl}
+
+%% Redefine the footnote environment so it has no reference and no number.
+\long\def\symbolfootnote#1{\begingroup%
+\def\thefootnote{\fnsymbol{footnote}}\footnotetext{#1}\endgroup}
+
+%% Define the author, title, and date for the document.
+\author{Jeffrey~Finkelstein\\ Computer Science Department, Boston University}
+\title{Limited nondeterminism and verification}
+
+\begin{document}
+
+\maketitle
+
+\symbolfootnote{%
+  Copyright 2015 Jeffrey~Finkelstein \email{jeffreyf@bu.edu}.
+
+  This document is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License, which is available at \mbox{\url{https://creativecommons.org/licenses/by-sa/4.0/}}.
+  The \LaTeX{} markup that generated this document can be downloaded from its website at \mbox{\url{https://github.com/jfinkels/limndver}}.
+  The markup is distributed under the same license.
+}
+
+\section{Completeness respecting verification}
+
+Completeness under many-one reductions in nondeterministic complexity classes fails in differentiating problems with different verification complexity.
+Consider the satisfiability problem for Boolean circuits, for Boolean formulas, and for 3-CNF Boolean formulas.
+Each problem can be solved by nondeterministically choosing an input $x$ of $n$ bits, where $n$ is the number of variables in the circuit or formula, then verifying whether the input $x$ satisfies the circuit or formula.
+However, each verification process has vastly different computational complexity: evaluating a circuit is a $\P$-complete problem, evaluating a Boolean formula is an $\NC^1$-complete problem, and evaluating a 3-CNF Boolean formula is an $\AC^0$ problem.
+Contrast this with the fact that each of the original decision problems is well-known to be $\NP$-complete (and even complete for $\NP$ under logarithmic space many-one reductions).
+
+\subsection{Reductions respecting verification complexity}
+
+Let $L_1$ and $L_2$ be decision problems with corresponding witness relations $R_1$ and $R_2$.
+There is a \emph{many-one reduction} from $L_1$ to $L_2$, denoted $L_1 \leq_m L_2$, if there is a computable function $f$ such that $x \in L_1$ if and only if $f(x) \in L_2$.
+There is a \emph{weak Levin reduction} from $L_1$ to $L_2$, denoted $L_1 \leq_w L_2$, if $L_1 \leq_m L_2$ and $R_1 \leq_m R_2$.
+There is a \emph{Levin reduction} from $L_1$ to $L_2$, denoted $L_1 \leq_L L_2$, if there are computable functions $f$, $g$, and $h$ such that
+\begin{enumerate}
+\item if $(x, w) \in R_1$, then $(f(x), g(x, w)) \in R_2$,
+\item if $(f(x), w') \in R_2$, then $(x, h(x, w')) \in R_1$.
+\end{enumerate}
+
+In a Levin reduction, the goal is to recover a witness for an instance of $L_1$ given a witness to an instance of $L_2$.
+In the weak Levin reduction, there is no requirement that the original witness is recoverable.
+
+\begin{lemma}
+  $L_1 \leq_L L_2$ implies $L_1 \leq_m L_2$.
+\end{lemma}
+\begin{proof}
+  The function $f$ is the necessary many-one reduction.
+  First suppose $x \in L_1$.
+  \begin{align*}
+    x \in L_1 & \implies \exists w \colon (x, w) \in R_1 \\
+    & \implies \exists w \colon (f(x), g(x, w)) \in R_2 \\
+    & \implies \exists w' \colon (f(x), w') \in R_2 \\
+    & \implies f(x) \in R_2
+  \end{align*}
+  Next suppose $f(x) \in L_2$.
+  \begin{align*}
+    f(x) \in L_2 & \implies \exists w' \colon (f(x), w') \in R_2 \\
+    & \implies \exists w' \colon (x, h(x, w')) \in R_1 \\
+    & \implies \exists w \colon (x, w) \in R_1 \\
+    & \implies x \in L_1
+  \end{align*}
+  Thus $x \in L_1$ if and only if $f(x) \in L_2$.
+\end{proof}
+
+The weak Levin reduction is so named because it is a compromise between the Levin reduction and the many-one reduction.
+
+\begin{proposition}\label{prop:weaklevin}
+  $L_1 \leq_L L_2$ implies $L_1 \leq_w L_2$ implies $L_1 \leq_m L_2$.
+\end{proposition}
+\begin{proof}
+  Suppose $L_1 \leq_L L_2$.
+  By the previous lemma, $L_1 \leq_m L_2$.
+  The function $(x, w) \mapsto (f(x), g(x, y))$ proves that $R_1 \leq_m R_2$.
+\end{proof}
+
+Since the weak Levin reduction is a more fine-grained comparison than the many-one reduction, a weak Levin reduction from a harder problem to an easier problem has more severe implications than a many-one reduction between the same problems.
+%% Let $(\mathcal{C}_1, \mathcal{C}_2)$ denote the class of all languages in $\mathcal{C}_1$ that have witness relations in $\mathcal{C}_2$.
+There is a \emph{$(\mathcal{C}_1, \mathcal{C}_2)$ weak Levin reduction} from $L_1$ to $L_2$, denoted $L_1 \leq^{\mathcal{C}_1, \mathcal{C}_2}_w L_2$, if $L_1 \leq^{\mathcal{C}_1}_m L_2$ and $R_1 \leq^{\mathcal{C}_2}_m R_2$.
+A $(\mathcal{C}, \mathcal{C})$ weak Levin reduction is simply written as a \emph{$\mathcal{C}$ weak Levin reduction} and denoted $\leq^{\mathcal{C}}_w$.
+%% A language $L$ with corresponding witness relation $R$ is $(\mathcal{C}_1, \mathcal{C}_1, \mathcal{D}_1, \mathcal{D}_2)$-complete if $L \in (\mathcal{C}_1, \mathcal{C}_2)$, and for each language $L' \in (\mathcal{C}_1, \mathcal{C}_2)$, we have $L' \leq^{\mathcal{D}_1, \mathcal{D}_2}_w L$.
+
+\begin{proposition}
+  For any integer $d$ greater than 1,
+  \begin{enumerate}
+  \item If $\beta_2 \CSAT \leq_m^\L \beta_2 \NC^d \CSAT$, then $\bNC^d = \bP$.
+  \item If $\beta_2 \CSAT \leq_w^\L \beta_2 \NC^d \CSAT$, then $\NC^d = \P$.
+  \end{enumerate}
+\end{proposition}
+
+Here are two brief comments about this proposition.
+First, this proposition extends to other levels of the beta hierarchy as well.
+Second, the restriction that the reductions are computable in logarithmic space instead of polynomial time is not onerous: under $\leq_m^\L$ reductions, $\beta_2 \CSAT$ is complete for $\bP$ and $\beta_2 \NC^d \CSAT$ is complete for $\bNC^d$ (\todo{cite Sam H. here}).
+
+\subsection{Complexity classes specifying verification complexity}
+
+The complexity class $\GC(f(n), \mathcal{C})$ is the class of all languages $L$ for which there is a witness relation $R$ such that $x \in L$ if and only if there is a $w$ of length at most $O(f(n))$ such that $(x, w) \in R$ \autocite{cc97}.
+This notation generalizes several other classes:
+\begin{align*}
+  \NP & = \cup_{k \in \mathbb{N}} \GC(n^k, \P) \\
+  \betaP & = \cup_{k \in \mathbb{N}} \GC(\log^k n, \P) \\
+  \betaNC & = \cup_{k \in \mathbb{N}} \GC(\log^k n, \NC)
+\end{align*}
+
+Inclusions of complexity classes are preserved when adding nondeterminism.
+
+\begin{lemma}
+  For complexity classes $\mathcal{C}_1$ and $\mathcal{C}_2$, if $\mathcal{C}_1 \subseteq \mathcal{C}_2$, then $\GC(f(n), \mathcal{C}_1) \subseteq \GC(f(n), \mathcal{C}_2)$.
+\end{lemma}
+
+The set of $\NP$-complete problems spans several of these ``guess-and-check'' classes.
+
+\begin{lemma}
+  \mbox{}
+  \begin{enumerate}
+  \item $\ThreeSAT$ is $\NP$-complete and in $\GC(\poly, \AC^0)$.
+  \item $\FSAT$ is $\NP$-complete and in $\GC(\poly, \NC^1)$.
+  \item $\CSAT$ is $\NP$-complete and in $\GC(\poly, \P)$.
+  \end{enumerate}
+\end{lemma}
+
+Unfortunately, even specifying complexity classes in terms of verification complexity is not satisfactory, since $\NP = \GC(\poly, \P) = \GC(\poly, \NC^1)$ \autocite[Theorem~2.2]{wolf94}.
+This puts $\FSAT$ and $\CSAT$ in the same class still.
+We need a more fine-grained approach to comparing the complexity of problems based on their verification complexity.
+
+\subsection{Completeness under weak Levin reductions}
+
+We want to separate the satisfiability problem for circuits, formulas, and 3-CNF formulas.
+
+\begin{theorem}
+  \mbox{}
+  \begin{enumerate}
+  \item $\CSAT$ is complete for $\GC(\poly, \P)$ under $\leq_w^{\P, \L}$ reductions.
+  \item $\FSAT$ is complete for $\GC(\poly, \NC^1)$ under $\leq_w^{\P, \AC^0}$ reductions.
+  \end{enumerate}
+\end{theorem}
+
+The following corollary essentially shows that $\NP$ is not closed under $\leq^L_w$ reductions unless $\NC = \P$.
+
+\begin{corollary}
+  \begin{equation*}
+  \ThreeSAT \equiv_m^\L \FSAT \equiv_m^\L \CSAT
+  %\end{equation*}
+  \text{ and }
+  %\begin{equation*}
+    \ThreeSAT \leq_w^{\AC^0} \FSAT \leq_w^{\AC^0} \CSAT
+  \end{equation*}
+  but
+  \begin{enumerate}
+  \item $\FSAT \nleq_w^{\P, \AC^0} \ThreeSAT$ unless $\AC^0 = \NC^1$,
+  \item $\CSAT \nleq_w^{\P, \L} \ThreeSAT$ unless $\NC = \P$,
+  \item $\CSAT \nleq_w^{\P, \L} \FSAT$ unless $\NC = \P$.
+  \end{enumerate}
+\end{corollary}
+
+In general, how can we construct a problem that is complete for a guess-and-check class under weak Levin reductions?
+There are two strategies: start from a problem complete for $\GC(f(n), \mathcal{C})$ under many-one reductions and ensure that its witness relation is complete for $\mathcal{C}$ under many-one reductions, or start from a $\mathcal{C}$-complete witness relation and consider its projection onto its first component.
+A third strategy is to choose a complete problem for $\mathcal{C}$ and define our complexity classes as the closure of that problem under weak Levin reductions; this is what happens in the next subsection.
+
+\subsection{Classes respecting verification complexity}
+
+We wish to determine complexity classes that are closed under weak Levin reductions.
+Let $\cl(L, \leq)$ denote the class of all languages $\leq$-reducible to $L$, and let $\cl(\mathcal{C}, \leq) = \cup_{L \in \mathcal{C}} \cl(L, \leq)$.
+(If $L$ is complete for $\mathcal{C}$ under $\leq$ reductions, then $\cl(\mathcal{C}, \leq) = \cl(L, \leq)$.)
+For example,
+\begin{align*}
+  \NP & = \cl(\CSAT, \leq^\L_m) \\
+  \NNC^d & = \cl(\NC^d \CSAT, \leq^\L_m) \\
+  \NNC^1 & = \cl(\FSAT, \leq^{\AC^0}_m) \\[1ex]
+  \bP & = \cl(\beta_2 \CSAT, \leq^\L_m) \\
+  \bNC^d & = \cl(\beta_2 \NC^d \CSAT, \leq^\L_m) \\
+  \bNC^1 & = \cl(\beta_2 \FSAT, \leq^{\AC^0}_m) \\[1ex]
+  \P & = \cl(\CVP, \leq^\L_m) \\
+  \NC^d & = \cl(\NC^d \CVP, \leq^\L_m) \\
+  \NC^1 & = \cl(\FVP, \leq^{\AC^0}_m).
+\end{align*}
+For each of these complexity classes $\mathcal{C}$, we define $\mathcal{C}_w$ to be the closure under the appropriate resource-bounded weak Levin reduction instead of many-one reduction.
+The closure under the weak Levin reduction is a subset of the closure under the many-one reduction, by \autoref{prop:weaklevin}.
+
+%% \begin{align*}
+%%   \NP_w & = \cl(\CSAT, \leq^\L_w) \\
+%%   \NNC^d_w & = \cl(\NC^d \CSAT, \leq^\L_w) \\
+%%   \NNC^1_w & = \cl(\FSAT, \leq^{\AC^0}_w) \\
+%%   \bP_w & = \cl(\beta_2 \CSAT, \leq^\L_w) \\
+%%   \bNC^d_w & = \cl(\beta_2 \NC^d \CSAT, \leq^\L_w) \\
+%%   \bNC^1_w & = \cl(\beta_2 \FSAT, \leq^{\AC^0}_w) \\
+%%   \P_w & = \cl(\CVP, \leq^\L_w) \\
+%%   \NC^d_w & = \cl(\NC^d \CVP, \leq^\L_w) \\
+%%   \NC^1_w & = \cl(\FVP, \leq^{\AC^0}_w).
+%% \end{align*}
+
+\begin{theorem}
+  For each positive integer $d$ greater than one, $\NNC^1 = \NNC^d = \NP$, but
+  \begin{enumerate}
+  \item if $\NNC^1_w = \NNC^d_w$, then $\NC^1 = \NC^d$,
+  \item if $\NNC^d_w = \NP_w$, then $\NC^d = \P$.
+  \item if $\NNC^1_w = \NP_w$, then $\NC^1 = \P$.
+  \end{enumerate}
+\end{theorem}
+\begin{proof}
+  $\NNC^1 = \NP$ by \autocite[Theorem~2.2]{wolf94}.
+  If $\NNC^1_w = \NNC^d_w$, then $\NC^d \CVP \leq_m^{\AC^0} \FVP$, so $\NC^d \CVP$ is in $\NC^1$.
+  If $\NNC^d_w = \NP_w$, then $\CVP \leq_m^{\L} \NC^d \CVP$, so $\CVP$ is in $\NC^d$.
+  if $\NNC^1_w = \NP_w$, then $\CVP \leq_m^{\AC^0} \FVP$, so $\CVP$ is in $\NC^1$.
+\end{proof}
+
+How do these compare with our traditional classes?
+\todo{I want to say if $\NP_w = \NP$ then something bad happens.}
+
+\section{Limited nondeterminism}
+
+Now consider the tournament dominating set problem: given a tournament, decide whether it has a dominating set of size at most $k$.
+Each tournament has a dominating set of size at most $\log n$, so the parameter $k$ must be bounded above by $\log n$.
+Thus the problem can be solved by the following algorithm: given a tournament with vertex set $V$ and edge set $E$, nondeterministically choose a subset $S$ of $V$ of cardinality $k$ and decide whether for each $v$ in $V$ there is a $u$ in $S$ such that $(u, v) \in E$.
+This algorithm chooses $O(\log^2 n)$ nondeterministic bits and verifies whether the chosen set is a dominating set by an $\AC^0$ circuit computing
+$$
+\bigwedge_{v \in V} \bigvee_{u \in S} (u, v) \in E.
+$$
+Thus the problem is in $\bAC^0$.
+A similar algorithm applies when deciding whether a graph has a clique of size at most $O(\log n)$: nondeterministically choose a candidate clique $S$ then decide whether
+$$
+\bigwedge_{u \in S} \bigwedge_{v \in S} (u, v) \in E,
+$$
+again a $\bAC^0$ algorithm.
+
+Since the tournament dominating set problem and the logarithmically bounded clique problem are $\LOGSNP$-complete, and each is in $\bAC^0$, and $\bAC^0 \subseteq \bNC^2$, and the problems are actually complete for $\LOGSNP$ under $\L$ ($\NC^1$?) man-one reductions, and logarithmic space functions compose, and $\L \in \NC^2$, we have $\LOGSNP \subseteq \bNC^2$.
+TODO Is $\LOGNP$ in there more generally?
+TODO Show how the consequences of $\P = \LOGSNP$ compare with the consequences of $\P = \bNC^2$.
+TODO Show a NCPCP algorithm for tournament dominating set.
+TODO Adapt FO[polylog] definition of NC to $\bNC$.
+
+\section{Combining limited nondeterminism and reductions respecting verification}
+
+Here, we wish to show that for classes like $\LOGSNP$ and classes like $\APX$, these reductions can be used when showing completeness to further classify the complexity of these problems, while still demonstrating the comparison due to many-one reductions.
+
+%% Print the bibliography section here.
+\printbibliography
+
+\end{document}
