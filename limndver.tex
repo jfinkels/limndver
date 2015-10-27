@@ -306,7 +306,15 @@ The closure under the weak Levin reduction is a subset of the closure under the 
 \end{proof}
 
 How do these compare with our traditional classes?
-\todo{I want to say if $\NP_w = \NP$ then something bad happens.}
+
+\begin{theorem}
+  For each positive integer $d$ greater than one, if $\NNC^d_w = \NNC^d$, then $\NC^d = \P$.
+\end{theorem}
+\begin{proof}
+  Since $\NP = \NNC^d$ by \autocite[Theorem~2.2]{wolf94} and $\NNC^d = \NNC^d_w$ by hypothesis, we have $\NP = \NNC^d_w$.
+  Thus there is a logarithmic space weak Levin reduction from $\CSAT$ to $\NC^d \SAT$.
+  This implies $\NC^d = \P$.
+\end{proof}
 
 \section{Limited nondeterminism}
 
