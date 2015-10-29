@@ -181,11 +181,11 @@ There is a \emph{$(\mathcal{C}_1, \mathcal{C}_2)$ weak Levin reduction} from $L_
 A $(\mathcal{C}, \mathcal{C})$ weak Levin reduction is simply written as a \emph{$\mathcal{C}$ weak Levin reduction} and denoted $\leq^{\mathcal{C}}_w$.
 %% A language $L$ with corresponding witness relation $R$ is $(\mathcal{C}_1, \mathcal{C}_1, \mathcal{D}_1, \mathcal{D}_2)$-complete if $L \in (\mathcal{C}_1, \mathcal{C}_2)$, and for each language $L' \in (\mathcal{C}_1, \mathcal{C}_2)$, we have $L' \leq^{\mathcal{D}_1, \mathcal{D}_2}_w L$.
 
-\begin{proposition}
+\begin{proposition}\label{prop:betacollapse}
   For any integer $d$ greater than 1,
   \begin{enumerate}
-  \item If $\beta_2 \CSAT \leq_m^\L \beta_2 \NC^d \CSAT$, then $\bNC^d = \bP$.
-  \item If $\beta_2 \CSAT \leq_w^\L \beta_2 \NC^d \CSAT$, then $\NC^d = \P$.
+  \item $\beta_2 \CSAT \leq_m^\L \beta_2 \NC^d \CSAT$ if and only if $\bNC^d = \bP$.
+  \item $\beta_2 \CSAT \leq_w^\L \beta_2 \NC^d \CSAT$ if and only if $\NC^d = \P$.
   \end{enumerate}
 \end{proposition}
 
@@ -275,8 +275,18 @@ For example,
   \NC^d & = \cl(\NC^d \CVP, \leq^\L_m) \\
   \NC^1 & = \cl(\FVP, \leq^{\AC^0}_m).
 \end{align*}
-For each of these complexity classes $\mathcal{C}$, we define $\mathcal{C}_w$ to be the closure under the appropriate resource-bounded weak Levin reduction instead of many-one reduction.
+For each of the nondeterministic complexity classes $\mathcal{C}$, we define $\mathcal{C}_w$ to be the closure under the appropriate resource-bounded weak Levin reduction instead of many-one reduction.
+(The notion does not make sense for the deterministic complexity classes, since it requires that a language have a witness relation.)
+
+%% \begin{lemma}
+%%   For each class of functions $\mathcal{F}$, each complexity class $\mathcal{C}$ with $\leq_m^\mathcal{F}$-complete problem $K$, and each function $f$, we have $\GC(f(n), \mathcal{C})_w = \cl(\exists^{f(n)} K, \leq_w^{\mathcal{F}})$, where $\exists^{f(n)} K$ denotes the language $\{ x \,|\, \exists w \in \{0, 1\}^{f(n)} \colon (x, w) \in K\}$.
+%% \end{lemma}
+%% \begin{proof}
+%% \end{proof}
+
 The closure under the weak Levin reduction is a subset of the closure under the many-one reduction, by \autoref{prop:weaklevin}.
+Are the closures under these two types of reductions equal?
+The following theorem provides evidence that they are not.
 
 %% \begin{align*}
 %%   \NP_w & = \cl(\CSAT, \leq^\L_w) \\
@@ -305,7 +315,49 @@ The closure under the weak Levin reduction is a subset of the closure under the 
   if $\NNC^1_w = \NP_w$, then $\CVP \leq_m^{\AC^0} \FVP$, so $\CVP$ is in $\NC^1$.
 \end{proof}
 
-How do these compare with our traditional classes?
+We wish to apply this strategy more generally.
+This is interesting because complexity classes traditionally don't have this ``downward collapse'' property.
+(This generalizes not only the previous theorem but also \autoref{prop:betacollapse}.)
+
+\begin{theorem}
+  Suppose
+  \begin{itemize}
+  \item $\mathcal{C}$ and $\mathcal{D}$ are complexity classes,
+  \item $\mathcal{F}$ is a class of functions,
+  \item $\leq_m^{\mathcal{F}}$ reductions are transitive,
+  \item $f$ is a function,
+  \item $\mathcal{C} \subseteq \mathcal{D}$,
+  \item $\mathcal{C}$ is closed under $\leq_m^\mathcal{F}$ reductions.
+  \item there are languages $K_\mathcal{C}$ and $K_\mathcal{D}$ that are $\leq_m^\mathcal{F}$-complete for $\GC(f(n), \mathcal{C})$ and $\GC(f(n), \mathcal{D})$, respectively,
+  \item the witness relations $R_\mathcal{C}$ and $R_\mathcal{D}$ for $K_\mathcal{C}$ and $K_\mathcal{D}$, respectively, are $\leq_m^\mathcal{F}$-complete for $\mathcal{C}$ and $\mathcal{D}$, respectively.
+  \end{itemize}
+  If $\GC(f(n), \mathcal{C})_w = \GC(f(n), \mathcal{D})_w$, then $\mathcal{C} = \mathcal{D}$.
+\end{theorem}
+\begin{proof}
+  %% Let $K_\mathcal{D}$ and $K_\mathcal{C}$ be the $\leq_m^\mathcal{F}$-complete problems for classes $\mathcal{C}$ and $\mathcal{D}$, respectively.
+  Since $\mathcal{C}$ is closed under $\leq_m^\mathcal{F}$ reductions and such reductions are transitive, it suffices to show $R_\mathcal{D} \leq_m^\mathcal{F} R_\mathcal{C}$.
+  By definition,
+  \begin{equation*}
+    \GC(f(n), \mathcal{C})_w = \cl(\GC(f(n), \mathcal{C}), \leq_w^\mathcal{F}) = \cl(K_\mathcal{C}, \leq_w^\mathcal{F})
+  \end{equation*}
+  and similarly $\GC(f(n), \mathcal{D})_w = \cl(K_\mathcal{D}, \leq_w^\mathcal{F})$.
+  By hypothesis, $\GC(f(n), \mathcal{C})_w = \GC(f(n), \mathcal{D})_w$, so $\cl(K_\mathcal{C}, \leq_w^\mathcal{F}) = \cl(K_\mathcal{D}, \leq_w^\mathcal{F})$.
+  Thus $K_\mathcal{D} \leq_w^\mathcal{F} K_\mathcal{C}$ and hence $R_\mathcal{D} \leq_m^\mathcal{F} R_\mathcal{C}$.
+\end{proof}
+
+How do these complexity classes compare with our traditional classes?
+
+\todo{Problem: see the next theorem; this applies to $\NNC_w$ also, which we already proved not equal to $\NNC$.}
+
+\begin{theorem}
+  $\NP_w = \NP$.
+\end{theorem}
+\begin{proof}
+  The inclusion $\NP_w \subseteq \NP$ follows immediately from the definitions.
+  Let $L$ be a language in $\NP$ with witness relation $R$ in $\P$.
+  Since $\CSAT$ is $\NP$-complete, $L \leq_m^\L \CSAT$, and since $\CVP$ is $\P$-complete, $R \leq_m^\L \CVP$.
+  Thus $L \leq_w^\L \CSAT$, hence $L \in \NP_w$ by the definition of the complexity class.
+\end{proof}
 
 \begin{theorem}
   For each positive integer $d$ greater than one, if $\NNC^d_w = \NNC^d$, then $\NC^d = \P$.
@@ -332,13 +384,15 @@ $$
 $$
 again a $\bAC^0$ algorithm.
 
-Since the tournament dominating set problem and the logarithmically bounded clique problem are $\LOGSNP$-complete, and each is in $\bAC^0$, and $\bAC^0 \subseteq \bNC^2$, and the problems are actually complete for $\LOGSNP$ under $\L$ ($\NC^1$?) man-one reductions, and logarithmic space functions compose, and $\L \in \NC^2$, we have $\LOGSNP \subseteq \bNC^2$.
+Since the tournament dominating set problem and the logarithmically-bounded clique problem are both $\LOGSNP$-complete, and each is in $\bAC^0$, and $\bAC^0 \subseteq \bNC^2$, and the problems are actually complete for $\LOGSNP$ under $\L$ ($\NC^1$?) man-one reductions, and logarithmic space functions compose, and $\L \in \NC^2$, we have $\LOGSNP \subseteq \bNC^2$.
 TODO Is $\LOGNP$ in there more generally?
 TODO Show how the consequences of $\P = \LOGSNP$ compare with the consequences of $\P = \bNC^2$.
 TODO Show a NCPCP algorithm for tournament dominating set.
 TODO Adapt FO[polylog] definition of NC to $\bNC$.
 
-\section{Combining limited nondeterminism and reductions respecting verification}
+\todo{For LOGNP and LOGSNP, require the formula $\phi$ to be not just a quantifier first-order formula, but to be a $\FO(n^O(1))$ formula in order to get $P$-hard verification?}
+
+\section[Combining limited nondeterminism and reductions respecting verification]{Combining limited nondeterminism and \\ reductions respecting verification}
 
 Here, we wish to show that for classes like $\LOGSNP$ and classes like $\APX$, these reductions can be used when showing completeness to further classify the complexity of these problems, while still demonstrating the comparison due to many-one reductions.
 
